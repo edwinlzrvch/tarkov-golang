@@ -1,11 +1,13 @@
 package main
 
 import (
+	"./pkg/entity"
+	"./pkg/room"
 	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	"go.mongodb.org/mongo-driver/bson"
+	//"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
@@ -16,14 +18,16 @@ import (
 var ctx context.Context
 var client *mongo.Client
 var collection *mongo.Collection
-var episodes []bson.M
+var userService *room.Service
+var rooms []*entity.Room
 
 func getAllRooms(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(episodes)
+	json.NewEncoder(w).Encode(rooms)
 }
 
 func main() {
 	connection()
+
 	fmt.Println("hello")
 	r := mux.NewRouter()
 	r.HandleFunc("/Rooms", getAllRooms)
@@ -50,8 +54,12 @@ func connection() {
 		log.Fatal(err)
 	}
 	defer client.Disconnect(ctx)
+
 	tarkovDatabase := client.Database("TarkvoDb")
-	roomsCollection := tarkovDatabase.Collection("Rooms")
+	userRepo := room.NewMongoRepository(tarkovDatabase, ctx)
+	userService = room.NewService(userRepo)
+	rooms = userService.GetAllRooms()
+	// roomsCollection := tarkovDatabase.Collection("Rooms")
 	//_, err = roomsCollection.InsertOne(ctx, bson.D{
 	//	{"Rate", "20"},
 	//	{"Host", "Loh"},
@@ -61,12 +69,12 @@ func connection() {
 	//if err != nil {
 	//	log.Fatal(err)
 	//}
-	cursor, err := roomsCollection.Find(ctx, bson.M{})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err = cursor.All(ctx, &episodes); err != nil {
-		log.Fatal(err)
-	}
+	//cursor, err := roomsCollection.Find(ctx, bson.M{})
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//
+	//if err = cursor.All(ctx, &episodes); err != nil {
+	//	log.Fatal(err)
+	//}
 }

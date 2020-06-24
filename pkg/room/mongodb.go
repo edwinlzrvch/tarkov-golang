@@ -1,37 +1,54 @@
 package room
 
 import (
-	"github.com/juju/mgosession"
-	"gopkg.in/mgo.v2/bson"
+	. "../entity"
+	"context"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"log"
 )
 
 type repo struct {
-	pool *mgosession.Pool
+	db  *mongo.Database
+	ctx context.Context
 }
 
-func NewMongoRepository(p *mgosession.Pool) Repository {
+func NewMongoRepository(db *mongo.Database, ctx context.Context) Repository {
 	return &repo{
-		pool: p,
+		db,
+		ctx,
 	}
 }
 
 func (r *repo) Find(id string) (*Room, error) {
 	result := Room{}
-	session := r.pool.Session(nil)
-	coll := session.DB("").C("Rooms")
-	err := coll.Find(bson.M{"_id": id}).One(&result)
+	coll := r.db.Collection("Rooms")
+	err := coll.FindOne(r.ctx, bson.M{"_id": id}).Decode(&result)
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
 	return &result, nil
 }
 
-func (r *repo) Add(room *Room) (*Room, error) {
-	session := r.pool.Session(nil)
-	coll := session.DB("TarkvoDb").C("Rooms")
-	err := coll.Insert(room)
+func (r *repo) FindAll() []*Room {
+	var allRooms []*Room
+	coll := r.db.Collection("Rooms")
+	cursor, err := coll.Find(r.ctx, bson.M{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err = cursor.All(r.ctx, &allRooms); err != nil {
+		log.Fatal(err)
+	}
+	return allRooms
+}
+
+func (r *repo) Add(room *Room) (*mongo.InsertOneResult, error) {
+	coll := r.db.Collection("Rooms")
+	roomResult, err := coll.InsertOne(r.ctx, room)
+	println(roomResult.InsertedID)
 	if err != nil {
 		return nil, err
 	}
-	return room, nil
+	return roomResult, nil
 }
