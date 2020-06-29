@@ -59,22 +59,4 @@ func connection() {
 	userRepo := room.NewMongoRepository(tarkovDatabase, ctx)
 	userService = room.NewService(userRepo)
 	rooms = userService.GetAllRooms()
-	// roomsCollection := tarkovDatabase.Collection("Rooms")
-	//_, err = roomsCollection.InsertOne(ctx, bson.D{
-	//	{"Rate", "20"},
-	//	{"Host", "Loh"},
-	//	{"Description", "Da"},
-	//	{"Players", "15"},
-	//})
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//cursor, err := roomsCollection.Find(ctx, bson.M{})
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//
-	//if err = cursor.All(ctx, &episodes); err != nil {
-	//	log.Fatal(err)
-	//}
 }
