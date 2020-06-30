@@ -1,18 +1,21 @@
 package main
 
 import (
-	"./pkg/entity"
-	"./pkg/room"
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"github.com/edwinlzrvch/tarkov-golang/pkg/entity"
+	"github.com/edwinlzrvch/tarkov-golang/pkg/room"
 	"github.com/gorilla/mux"
-	//"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/rs/cors"
+
 	"log"
 	"net/http"
 	"time"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var ctx context.Context
@@ -32,9 +35,14 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/Rooms", getAllRooms)
 
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowCredentials: true,
+	})
+
+	handler := c.Handler(r)
 	srv := &http.Server{
-		Handler: r,
-		Addr:    "127.0.0.1:8000",
+		Handler: handler,
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
@@ -56,7 +64,7 @@ func connection() {
 	defer client.Disconnect(ctx)
 
 	tarkovDatabase := client.Database("TarkvoDb")
-	userRepo := room.NewMongoRepository(tarkovDatabase, ctx)
+	userRepo := room.NewMongoRepository(ctx, tarkovDatabase)
 	userService = room.NewService(userRepo)
 	rooms = userService.GetAllRooms()
 }

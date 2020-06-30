@@ -1,7 +1,8 @@
 package entity
 
+// Room interface
 type Room struct {
-	Id          ID     `json:"id" bson:"_id,omitempty"`
+	ID          ID     `json:"id" bson:"_id,omitempty"`
 	Rate        int32  `json:"rate" bson:"rate"`
 	Host        string `json:"host" bson:"host"`
 	Description string `json:"description" bson:"description"`

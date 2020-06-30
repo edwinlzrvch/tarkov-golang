@@ -4,6 +4,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+// ID for Room
 type ID bson.ObjectId
 
 //StringToID convert a string to an ID

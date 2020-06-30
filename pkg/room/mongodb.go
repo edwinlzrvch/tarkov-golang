@@ -1,11 +1,12 @@
 package room
 
 import (
-	. "../entity"
 	"context"
+	"log"
+
+	"github.com/edwinlzrvch/tarkov-golang/pkg/entity"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
 )
 
 type repo struct {
@@ -13,15 +14,16 @@ type repo struct {
 	ctx context.Context
 }
 
-func NewMongoRepository(db *mongo.Database, ctx context.Context) Repository {
+// NewMongoRepository asd
+func NewMongoRepository(ctx context.Context, db *mongo.Database) Repository {
 	return &repo{
 		db,
 		ctx,
 	}
 }
 
-func (r *repo) Find(id string) (*Room, error) {
-	result := Room{}
+func (r *repo) Find(id string) (*entity.Room, error) {
+	result := entity.Room{}
 	coll := r.db.Collection("Rooms")
 	err := coll.FindOne(r.ctx, bson.M{"_id": id}).Decode(&result)
 	if err != nil {
@@ -30,8 +32,9 @@ func (r *repo) Find(id string) (*Room, error) {
 	return &result, nil
 }
 
-func (r *repo) FindAll() []*Room {
-	var allRooms []*Room
+// FindAll dadad
+func (r *repo) FindAll() []*entity.Room {
+	var allRooms []*entity.Room
 	coll := r.db.Collection("Rooms")
 	cursor, err := coll.Find(r.ctx, bson.M{})
 	if err != nil {
@@ -43,7 +46,8 @@ func (r *repo) FindAll() []*Room {
 	return allRooms
 }
 
-func (r *repo) Add(room *Room) (*mongo.InsertOneResult, error) {
+// Add daad
+func (r *repo) Add(room *entity.Room) (*mongo.InsertOneResult, error) {
 	coll := r.db.Collection("Rooms")
 	roomResult, err := coll.InsertOne(r.ctx, room)
 	println(roomResult.InsertedID)
